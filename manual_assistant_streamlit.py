@@ -9,10 +9,6 @@ OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 assistantID = st.secrets['assistantID']
 messageID = st.secrets['messageID']
 
-# OPENAI_API_KEY = "sk-proj-61ZjRe9T4IlJEFhkJbPcT3BlbkFJgmYS5Mo6n3jYo996DdPK"
-# assistantID = "asst_ngdVlbPlEDoAemh7MLY1GzF6"
-# messageID = "vs_cnuhiTTP1AXkR5fWWor3PUg7"
-
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 model_name = "gpt-4-0125-preview"
