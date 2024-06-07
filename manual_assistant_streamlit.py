@@ -9,8 +9,8 @@ OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 assistantID = st.secrets['assistantID']
 messageID = st.secrets['messageID']
 
-# OPENAI_API_KEY = "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"
-# assistantID = "asst_13gSCV4uptz48tAds0ZwtlIa"
+# OPENAI_API_KEY = "sk-proj-61ZjRe9T4IlJEFhkJbPcT3BlbkFJgmYS5Mo6n3jYo996DdPK"
+# assistantID = "asst_ngdVlbPlEDoAemh7MLY1GzF6"
 # messageID = "vs_cnuhiTTP1AXkR5fWWor3PUg7"
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
@@ -25,19 +25,19 @@ st.title("Smelting Manual Assistant 🤖")
 def create_new_thread():
     new_thread = client.beta.threads.create()
     new_thread_id = new_thread.id
-    with open("/home/crimsondawn/streamlit_app/ripik-ai-smelting-manual-chatbot/thread_ids.json", "r") as file:
+    with open("/home/crimsondawn/streamlit_app/smelting_app/thread_ids.json", "r") as file:
         thread_ids = json.load(file)
     thread_ids.append(new_thread_id)
-    with open("/home/crimsondawn/streamlit_app/ripik-ai-smelting-manual-chatbot/thread_ids.json", "w") as file:
+    with open("/home/crimsondawn/streamlit_app/smelting_app/thread_ids.json", "w") as file:
         json.dump(thread_ids, file)
 
 
 # function to delete the selected thread from the thread_ids.json file
 def delete_selected_thread(thread_id):
-    with open("/home/crimsondawn/streamlit_app/ripik-ai-smelting-manual-chatbot/thread_ids.json", "r") as file:
+    with open("/home/crimsondawn/streamlit_app/smelting_app/thread_ids.json", "r") as file:
         thread_ids = json.load(file)
     thread_ids.remove(thread_id)
-    with open("/home/crimsondawn/streamlit_app/ripik-ai-smelting-manual-chatbot/thread_ids.json", "w") as file:
+    with open("/home/crimsondawn/streamlit_app/smelting_app/thread_ids.json", "w") as file:
         json.dump(thread_ids, file)
 
 
@@ -49,13 +49,13 @@ if uploaded_file is not None:
     content = uploaded_file.getvalue()
     try:
         thread_ids = json.loads(content)
-        with open("/home/crimsondawn/streamlit_app/ripik-ai-smelting-manual-chatbot/thread_ids.json", "w") as file:
+        with open("/home/crimsondawn/streamlit_app/smelting_app/thread_ids.json", "w") as file:
             json.dump(thread_ids, file)
 
     except json.JSONDecodeError:
         st.write("Error: Invalid JSON file.")
 else:
-    with open("/home/crimsondawn/streamlit_app/ripik-ai-smelting-manual-chatbot/thread_ids.json", "r") as file:
+    with open("/home/crimsondawn/streamlit_app/smelting_app/thread_ids.json", "r") as file:
         thread_ids = json.load(file) 
 
 # Apply custom formatting to the sidebar navigation
@@ -98,31 +98,29 @@ btn = st.sidebar.download_button("Download threads as JSON",
 if selected_thread:
     st.write(f"messages for thread id: {selected_thread}")
 
-    # if prompt := st.chat_input("Your question"): # Prompt for user input and save to chat thread
-    #     message = {
-    #     "role": "user",
-    #     "content": prompt,
-    #     "attachments": [
-    #         { "file_id": messageID, "tools": [{"type": "file_search"}] }
-    #     ],
-    #     }
+    if prompt := st.chat_input("Your question"): # Prompt for user input and save to chat thread
+        message = {
+        "role": "user",
+        "content": prompt,
+        "attachments": [
+            { "file_id": messageID, "tools": [{"type": "file_search"}] }
+        ],
+        }
 
-    #     message_appended = client.beta.threads.messages.create(
-    #         thread_id=selected_thread,
-    #         role=message["role"],
-    #         content=message["content"]
-    #     )
-    #     run = client.beta.threads.runs.create_and_poll(
-    #         thread_id=selected_thread,
-    #         assistant_id=assistantID,
-    #     )
+        message_appended = client.beta.threads.messages.create(
+            thread_id=selected_thread,
+            role=message["role"],
+            content=message["content"]
+        )
+        run = client.beta.threads.runs.create_and_poll(
+            thread_id=selected_thread,
+            assistant_id=assistantID,
+        )
 
     # obtain messages for the selected thread
     messages = client.beta.threads.messages.list(thread_id=selected_thread)
-    for message in (messages.data):
-        if message.assistant_id is not None:
+    
+    # display messages
+    for message in reversed(messages.data):
+        with st.chat_message(message.role):
             st.write(message.content[0].text.value)
-        # with st.chat_message(message.role):
-        #     st.write(message.content[0].text.value)
-
-
